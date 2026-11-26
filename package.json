@@ -22,6 +22,6 @@
     "electron-builder": "26.18.0"
   },
   "main": "electron.mjs",
-  "description": "Wireless duplicate cleaner for TalkCloud",
+  "description": "Duplicate cleaner for TalkCloud",
   "author": "thisis-joe"
 }

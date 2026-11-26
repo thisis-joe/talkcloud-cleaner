@@ -1,5 +1,6 @@
-import { app, BrowserWindow, dialog } from 'electron';
+import { app, BrowserWindow, dialog, shell } from 'electron';
 import { join } from 'node:path';
+import { PLATFORM_TOOLS_URL } from './usb.mjs';
 
 const smoke = process.argv.includes('--smoke-test');
 let stopServer;
@@ -29,6 +30,8 @@ app.on('before-quit', event => {
 });
 
 async function start() {
+  const sourceIcon = join(import.meta.dirname, 'build');
+  if (!app.isPackaged) app.dock?.setIcon(join(sourceIcon, 'icon.png'));
   process.env.TALKCLOUD_NO_OPEN = '1';
   process.env.TALKCLOUD_ELECTRON = '1';
   process.env.TALKCLOUD_APP_PROFILE = join(app.getPath('userData'), 'TalkCloudBrowser');
@@ -39,16 +42,20 @@ async function start() {
   const { appUrl, shutdown } = await import('./app.mjs');
   stopServer = shutdown;
   const window = new BrowserWindow({
-    width: 900,
-    height: 820,
+    width: 840,
+    height: 630,
     minWidth: 420,
     minHeight: 500,
     show: !smoke,
     autoHideMenuBar: true,
+    icon: !app.isPackaged && process.platform === 'win32' ? join(sourceIcon, 'icon.ico') : undefined,
     webPreferences: { sandbox: true, contextIsolation: true, nodeIntegration: false },
   });
   const local = new URL(appUrl).origin;
-  window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
+  window.webContents.setWindowOpenHandler(({ url }) => {
+    if (url === PLATFORM_TOOLS_URL) void shell.openExternal(url).catch(() => {});
+    return { action: 'deny' };
+  });
   window.webContents.session.setPermissionRequestHandler((_contents, _permission, callback) => callback(false));
   window.webContents.on('will-navigate', (event, url) => {
     if (new URL(url).origin !== local) event.preventDefault();

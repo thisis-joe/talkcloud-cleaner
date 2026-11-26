@@ -7,6 +7,8 @@ files:
   - app.mjs
   - match.mjs
   - talkcloud.mjs
+  - usb.mjs
+  - build/icon.png
   - public/**
   - package.json
 extraResources:
@@ -17,15 +19,20 @@ extraResources:
       - "!.links/**"
 win:
   target: nsis
+  icon: build/icon.ico
   artifactName: TalkCloudCleaner-${version}-windows-${arch}.${ext}
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
+  installerIcon: build/icon.ico
 mac:
   target: dmg
+  icon: build/icon.icns
   category: public.app-category.utilities
   artifactName: TalkCloudCleaner-${version}-mac-${arch}.${ext}
   identity: "-"
   notarize: false
   extendInfo:
     NSLocalNetworkUsageDescription: 휴대폰의 파일 지문을 같은 Wi-Fi에서 받기 위해 로컬 네트워크를 사용합니다.
+dmg:
+  icon: build/icon.icns
