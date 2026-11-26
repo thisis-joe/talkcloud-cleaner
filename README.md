@@ -8,17 +8,17 @@
 
 | PC | 설치 파일 | 여는 방법 |
 | --- | --- | --- |
-| Windows x64 | [Windows 설치 파일 (.exe)](https://github.com/thisis-joe/talkcloud-cleaner/releases/download/v0.2.0/TalkCloudCleaner-0.2.0-windows-x64.exe) | 다운로드한 `.exe`를 두 번 클릭해 설치합니다. |
-| Mac Apple Silicon | [Apple Silicon용 (.dmg)](https://github.com/thisis-joe/talkcloud-cleaner/releases/download/v0.2.0/TalkCloudCleaner-0.2.0-mac-arm64.dmg) | `.dmg`를 열고 앱을 **응용 프로그램** 폴더로 옮깁니다. |
-| Mac Intel | [Intel용 (.dmg)](https://github.com/thisis-joe/talkcloud-cleaner/releases/download/v0.2.0/TalkCloudCleaner-0.2.0-mac-x64.dmg) | `.dmg`를 열고 앱을 **응용 프로그램** 폴더로 옮깁니다. |
+| Windows x64 | [Windows 설치 파일 (.exe)](https://github.com/thisis-joe/talkcloud-cleaner/releases/download/v0.2.1/TalkCloudCleaner-0.2.1-windows-x64.exe) | 다운로드한 `.exe`를 두 번 클릭해 설치합니다. |
+| Mac Apple Silicon | [Apple Silicon용 (.dmg)](https://github.com/thisis-joe/talkcloud-cleaner/releases/download/v0.2.1/TalkCloudCleaner-0.2.1-mac-arm64.dmg) | `.dmg`를 열고 앱을 **응용 프로그램** 폴더로 옮깁니다. |
+| Mac Intel | [Intel용 (.dmg)](https://github.com/thisis-joe/talkcloud-cleaner/releases/download/v0.2.1/TalkCloudCleaner-0.2.1-mac-x64.dmg) | `.dmg`를 열고 앱을 **응용 프로그램** 폴더로 옮깁니다. |
 
 Mac 종류는 ** → 이 Mac에 관하여**에서 확인할 수 있습니다. **칩**에 Apple이 표시되면 Apple Silicon용을, **프로세서**에 Intel이 표시되면 Intel용을 받으세요. [Apple의 Mac 종류 확인 안내](https://support.apple.com/en-us/116943)
 
-[최신 릴리스 보기](https://github.com/thisis-joe/talkcloud-cleaner/releases/latest) · [v0.2.0 체크섬 (SHA‑256)](https://github.com/thisis-joe/talkcloud-cleaner/releases/download/v0.2.0/SHA256SUMS.txt)
+[최신 릴리스 보기](https://github.com/thisis-joe/talkcloud-cleaner/releases/latest) · [v0.2.1 체크섬 (SHA‑256)](https://github.com/thisis-joe/talkcloud-cleaner/releases/download/v0.2.1/SHA256SUMS.txt)
 
 ### 첫 실행에 보안 경고가 나오나요?
 
-**v0.2.0의 Windows 설치 파일은 게시자 서명이 없고, macOS 빌드는 Apple 공증을 받지 않았습니다.**
+**v0.2.1의 Windows 설치 파일은 게시자 서명이 없고, macOS 빌드는 Apple 공증을 받지 않았습니다.**
 
 - **Windows**에서는 SmartScreen이 앱을 인식하지 못했다는 경고를 표시할 수 있습니다. 조직에서 관리하는 PC에서는 정책에 따라 실행이 차단될 수 있습니다. [Microsoft SmartScreen 안내](https://learn.microsoft.com/windows/apps/package-and-deploy/smartscreen-reputation)
 - **macOS**에서는 Gatekeeper가 개발자를 확인할 수 없거나 Apple이 앱을 검사하지 못했다는 메시지를 표시하고 실행을 차단할 수 있습니다. 공증된 앱에도 인터넷에서 받은 앱을 처음 열 때 일반 확인창이 나올 수 있습니다. [Apple의 앱 열기 안내](https://support.apple.com/en-us/102445)
@@ -52,7 +52,7 @@ USB 케이블과 휴대폰 앱 설치 없이 사용할 수 있습니다. 폰과 
 
 - **실제 톡클라우드 드라이브**에서 테스트 파일 3개를 내려받아 비교했습니다. 로컬 테스트 폴더에 일치하는 2개만 한 번에 휴지통에 옮겼고, 나머지 1개는 드라이브에 남는 것을 확인했습니다.
 - **Windows 브라우저 자동 테스트**로 폰 화면의 지문 전송, 비교, 테스트용 드라이브의 휴지통 이동을 확인했습니다.
-- **Windows x64·Mac Apple Silicon·Mac Intel**에서 설치본에 들어 있는 앱과 브라우저의 시작을 GitHub Actions로 확인했습니다. Android·iOS 실기기와 실제 채팅 백업 파일의 휴지통 이동은 별도 실사용 검증이 필요합니다. [v0.2.0 빌드 및 검증 결과](https://github.com/thisis-joe/talkcloud-cleaner/actions/runs/45759625998)
+- **Windows x64·Mac Apple Silicon·Mac Intel**에서 설치본에 들어 있는 앱과 브라우저의 시작을 GitHub Actions로 확인했습니다. Android·iOS 실기기와 실제 채팅 백업 파일의 휴지통 이동은 별도 실사용 검증이 필요합니다. [v0.2.1 빌드 및 검증 결과](https://github.com/thisis-joe/talkcloud-cleaner/actions/runs/45765025882)
 
 ## 소스에서 실행
 
