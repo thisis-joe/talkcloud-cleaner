@@ -2,6 +2,11 @@ name: Build desktop release
 
 on:
   workflow_dispatch:
+    inputs:
+      preview_only:
+        description: Preview the release notice without publishing
+        type: boolean
+        default: false
   push:
     tags: ['v*']
 
@@ -61,15 +66,62 @@ jobs:
           executable=$(find dist -path '*/TalkCloudCleaner.app/Contents/MacOS/TalkCloudCleaner' -type f -print -quit)
           test -n "$executable"
           "$executable" --smoke-test
+      - name: Check Windows installer signature
+        if: matrix.platform == 'windows-x64'
+        shell: pwsh
+        run: |
+          $version = node -p "require('./package.json').version"
+          $installer = Join-Path dist "TalkCloudCleaner-$version-windows-x64.exe"
+          if (-not (Test-Path -LiteralPath $installer -PathType Leaf)) { throw "Installer missing: $installer" }
+          $signature = Get-AuthenticodeSignature -LiteralPath $installer
+          $status = if ($signature.Status -eq 'Valid') { 'verified' } else { 'unverified' }
+          Set-Content -LiteralPath 'dist/signing-status-windows-x64.txt' -Encoding ascii -Value $status
+          Write-Output "Authenticode status: $($signature.Status)"
+      - name: Check Mac Developer ID signature and notarization
+        if: runner.os == 'macOS'
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        shell: bash
+        run: |
+          version=$(node -p "require('./package.json').version")
+          image="dist/TalkCloudCleaner-$version-$PLATFORM.dmg"
+          mount_dir=$(mktemp -d "$RUNNER_TEMP/talkcloud-dmg.XXXXXX")
+          hdiutil attach -quiet -readonly -nobrowse -mountpoint "$mount_dir" "$image"
+          trap 'hdiutil detach -quiet "$mount_dir"; rmdir "$mount_dir"' EXIT
+          app="$mount_dir/TalkCloudCleaner.app"
+          test -d "$app"
+          developer_id='anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] exists and certificate leaf[field.1.2.840.113635.100.6.1.13] exists'
+          status=unverified
+          if codesign --verify --deep --strict -R="$developer_id" "$app" &&
+              { xcrun stapler validate "$image" || xcrun stapler validate "$app"; }; then
+            status=verified
+          fi
+          printf '%s\n' "$status" > "dist/signing-status-$PLATFORM.txt"
+          echo "Developer ID and notarization: $status"
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.platform }}
           path: |
             dist/*.exe
             dist/*.dmg
+            dist/signing-status-*.txt
           if-no-files-found: error
 
+  preview:
+    if: inputs.preview_only == true
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: installers
+          merge-multiple: true
+      - name: Preview release notes
+        run: node scripts/release-notes.mjs installers >> "$GITHUB_STEP_SUMMARY"
+
   publish:
+    if: inputs.preview_only != true
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -87,13 +139,20 @@ jobs:
         shell: bash
         run: |
           release_tag="v$(node -p "require('./package.json').version")"
-          cd installers
           windows="TalkCloudCleaner-${release_tag#v}-windows-x64.exe"
           mac_intel="TalkCloudCleaner-${release_tag#v}-mac-x64.dmg"
           mac_apple="TalkCloudCleaner-${release_tag#v}-mac-arm64.dmg"
-          sha256sum "$windows" "$mac_intel" "$mac_apple" > SHA256SUMS.txt
-          if gh release view "$release_tag" >/dev/null 2>&1; then
-            gh release upload "$release_tag" --clobber "$windows" "$mac_intel" "$mac_apple" SHA256SUMS.txt
+          (cd installers && sha256sum "$windows" "$mac_intel" "$mac_apple" > SHA256SUMS.txt)
+          files=("installers/$windows" "installers/$mac_intel" "installers/$mac_apple" installers/SHA256SUMS.txt)
+          existing="$RUNNER_TEMP/existing-release-notes.md"
+          notes="$RUNNER_TEMP/release-notes.md"
+          if gh release view "$release_tag" --json body --jq '.body // ""' > "$existing"; then
+            node scripts/release-notes.mjs installers "$existing" > "$notes"
+            gh release upload "$release_tag" --clobber "${files[@]}"
+            if ! cmp -s "$existing" "$notes"; then
+              gh release edit "$release_tag" --notes-file "$notes"
+            fi
           else
-            gh release create "$release_tag" --target "$GITHUB_SHA" --title "$release_tag" --notes "Windows x64 · macOS Apple Silicon · macOS Intel. These installers are not publisher-signed or Apple-notarized." "$windows" "$mac_intel" "$mac_apple" SHA256SUMS.txt
+            node scripts/release-notes.mjs installers > "$notes"
+            gh release create "$release_tag" --target "$GITHUB_SHA" --title "$release_tag" --notes-file "$notes" "${files[@]}"
           fi

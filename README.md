@@ -59,3 +59,5 @@ USB 케이블과 휴대폰 앱 설치 없이 사용할 수 있습니다. 폰과 
 Node.js 22.12 이상과 Chrome이 설치된 환경에서 `npm ci` 후 `npm run desktop`을 실행합니다. `npm test`는 로컬 비교, 페어링과 브라우저 자동화를 확인합니다.
 
 **Build desktop release** 워크플로를 실행하거나 버전 태그를 푸시하면 GitHub Actions가 각 운영체제의 설치 파일을 만들고 앱이 시작되는지 확인한 뒤 Releases에 게시합니다.
+
+게시 전에 Windows 설치 파일의 Authenticode 서명과 macOS 앱의 Developer ID 서명 및 Apple 공증 티켓을 확인합니다. 확인되지 않은 설치 파일의 첫 실행 경고가 릴리스 설명 맨 위에 표시됩니다. 수동 실행 시 **Preview the release notice without publishing**을 선택하면 게시 없이 준비된 안내를 실행 요약에서 확인할 수 있습니다.
