@@ -9,18 +9,19 @@ import { chromium } from 'playwright';
 import QRCode from 'qrcode';
 import { deviceFingerprints } from './match.mjs';
 import { CLOUD, TalkCloud } from './talkcloud.mjs';
+import { connectAndroidUsb } from './usb.mjs';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 const auth = randomBytes(32).toString('hex');
 const devices = new Map();
-let status = { message: '휴대폰을 연결하고 톡클라우드 목록을 열어 주세요.' };
-let pair;
-let pairServer;
-let pairTimer;
+let status = { message: '' };
+let pairing;
+let pairingSetup;
 let browser;
 let cloudPage;
 let plan;
 let busy = false;
+let stopping = false;
 
 const dataHome = process.platform === 'win32'
   ? (process.env.LOCALAPPDATA || homedir())
@@ -66,11 +67,13 @@ function listen(server, host) {
   });
 }
 
-function closePairing() {
-  clearTimeout(pairTimer);
-  pairServer?.close();
-  pairServer = undefined;
-  pair = undefined;
+async function closePairing(session = pairing) {
+  if (!session || session !== pairing) return;
+  pairing = undefined;
+  session.used = true;
+  clearTimeout(session.timer);
+  session.server.close();
+  await session.usb?.close();
 }
 
 const mobileAssets = new Map([
@@ -86,12 +89,25 @@ async function serveAsset(res, entry) {
   return reply(res, 200, await readFile(join(root, entry[0])), entry[1]);
 }
 
-async function startPairing(host) {
-  if (!privateInterfaces().includes(host)) throw new Error('PC의 Wi-Fi 주소를 선택해 주세요.');
-  closePairing();
+async function startPairing(method, host) {
+  if (pairingSetup || stopping) throw new Error('연결 준비가 끝날 때까지 기다려 주세요.');
+  if (method !== 'wifi' && method !== 'usb') throw new Error('연결 방식을 선택해 주세요.');
+  if (method === 'wifi' && !privateInterfaces().includes(host)) {
+    throw new Error('PC의 Wi-Fi 주소를 선택해 주세요.');
+  }
+  pairingSetup = preparePairing(method, host);
+  try {
+    await pairingSetup;
+  } finally {
+    pairingSetup = undefined;
+  }
+}
+
+async function preparePairing(method, host) {
+  await closePairing();
   const token = randomBytes(32).toString('hex');
-  const registration = { token, expires: Date.now() + 20 * 60_000, used: false, origin: '' };
-  const server = createServer(async (req, res) => {
+  const registration = { expires: Date.now() + 20 * 60_000, used: false, origin: '' };
+  registration.server = createServer(async (req, res) => {
     try {
       if (!registration.origin || req.headers.host !== new URL(registration.origin).host) {
         return reply(res, 403, { error: '페어링 주소가 일치하지 않습니다.' });
@@ -110,20 +126,32 @@ async function startPairing(host) {
       const id = randomBytes(12).toString('hex');
       registration.used = true;
       devices.set(id, {
-        id, name, keys, salt: token, sizes: new Set(data.entries.map(entry => entry.size)), received: Date.now(),
+        id, name, method, keys, salt: token, sizes: new Set(data.entries.map(entry => entry.size)), received: Date.now(),
       });
       while (devices.size > 10) devices.delete(devices.keys().next().value);
       reply(res, 200, { count: keys.size });
-      closePairing();
+      void closePairing(registration);
     } catch (error) {
       if (!res.headersSent) reply(res, 400, { error: error.message });
     }
   });
-  registration.origin = await listen(server, host);
-  const url = registration.origin + '/pair.html#' + token;
-  pair = { url, qr: await QRCode.toDataURL(url, { width: 224, margin: 2 }) };
-  pairServer = server;
-  pairTimer = setTimeout(closePairing, 20 * 60_000);
+  pairing = registration;
+  try {
+    const local = await listen(registration.server, method === 'usb' ? '127.0.0.1' : host);
+    if (method === 'usb') registration.usb = await connectAndroidUsb(local);
+    if (stopping) throw new Error('앱을 닫는 중입니다.');
+    registration.origin = registration.usb?.origin || local;
+    const url = registration.origin + '/pair.html#' + token;
+    const qr = method === 'wifi' ? await QRCode.toDataURL(url, { width: 224, margin: 2 }) : undefined;
+    await registration.usb?.open(url);
+    if (pairing === registration) {
+      registration.presentation = { method, url, qr };
+      registration.timer = setTimeout(() => void closePairing(registration), registration.expires - Date.now());
+    }
+  } catch (error) {
+    await closePairing(registration);
+    throw error;
+  }
 }
 
 async function openCloud() {
@@ -141,8 +169,10 @@ async function openCloud() {
     });
     browser.on('close', () => { browser = undefined; cloudPage = undefined; plan = undefined; });
   }
-  cloudPage = browser.pages()[0] || await browser.newPage();
-  await cloudPage.goto(CLOUD + '/', { waitUntil: 'domcontentloaded', timeout: 30_000 });
+  const page = browser.pages()[0] || await browser.newPage();
+  await page.goto(CLOUD + '/product/DRIVE', { waitUntil: 'domcontentloaded', timeout: 30_000 });
+  plan = undefined;
+  cloudPage = page;
 }
 
 const progress = message => { status = { ...status, message }; };
@@ -158,12 +188,13 @@ function run(job) {
 
 function state() {
   return {
-    busy, status, pair, addresses: privateInterfaces(),
-    devices: Array.from(devices.values(), ({ id, name, keys, received }) => ({
-      id, name, count: keys.size, received,
-    })),
+    busy, status, pair: pairing?.presentation, addresses: privateInterfaces(),
+    cloudOpen: Boolean(cloudPage && !cloudPage.isClosed()),
+    devices: Array.from(devices.values())
+      .filter(device => Date.now() - device.received <= 2 * 60 * 60_000)
+      .map(({ id, name, method, keys, received }) => ({ id, name, method, count: keys.size, received })),
     plan: plan ? {
-      id: plan.id, device: plan.device.name, names: plan.result.matches.map(item => item.name),
+      id: plan.id, deviceId: plan.device.id, device: plan.device.name, names: plan.result.matches.map(item => item.name),
       checked: plan.result.checked, skipped: plan.result.skipped, capped: plan.result.capped,
     } : null,
   };
@@ -172,7 +203,8 @@ function state() {
 const desktopAssets = new Map([
   ['/', ['public/index.html', 'text/html; charset=utf-8']],
   ['/desktop.mjs', ['public/desktop.mjs', 'text/javascript; charset=utf-8']],
-  ['/style.css', ['public/style.css', 'text/css; charset=utf-8']],
+  ['/desktop.css', ['public/desktop.css', 'text/css; charset=utf-8']],
+  ['/icon.png', ['build/icon.png', 'image/png']],
 ]);
 
 let origin;
@@ -186,10 +218,11 @@ const desktop = createServer(async (req, res) => {
     const input = await jsonBody(req, 4096);
     switch (req.url) {
       case '/pair':
-        await startPairing(input.host);
+        await startPairing(input.method ?? 'wifi', input.host);
         break;
       case '/cancel-pair':
-        closePairing();
+        if (pairingSetup) throw new Error('연결 준비가 끝날 때까지 기다려 주세요.');
+        await closePairing();
         break;
       case '/open':
         run(async () => {
@@ -214,6 +247,7 @@ const desktop = createServer(async (req, res) => {
       }
       case '/trash': {
         if (!plan || plan.id !== input.plan || !plan.result.matches.length) throw new Error('비교 결과를 다시 확인해 주세요.');
+        if (!cloudPage || cloudPage.isClosed()) throw new Error('톡클라우드 창을 열고 다시 비교해 주세요.');
         if (Date.now() - plan.device.received > 2 * 60 * 60_000) throw new Error('기기 파일을 다시 확인해 주세요.');
         run(async () => {
           const current = plan;
@@ -241,12 +275,12 @@ if (process.env.TALKCLOUD_NO_OPEN !== '1') {
   spawn(opener, [appUrl], { stdio: 'ignore', windowsHide: true }).on('error', () => {});
 }
 
-let stopping = false;
 export async function shutdown() {
   if (stopping) return;
   stopping = true;
-  closePairing();
   desktop.close();
+  await pairingSetup?.catch(() => {});
+  await closePairing();
   await browser?.close().catch(() => {});
 }
 if (process.env.TALKCLOUD_ELECTRON !== '1') {

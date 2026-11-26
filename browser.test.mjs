@@ -40,6 +40,10 @@ test('휴대폰 브라우저의 지문으로 Drive에서 정확히 두 행을 �
   assert.deepEqual(initial.devices, []);
   assert.equal((await fetch(desktopUrl.origin + '/state')).status, 403);
   assert.ok(initial.addresses.length, '테스트에 사설 IPv4 인터페이스가 필요합니다.');
+  await desktop.getByRole('button', { name: 'USB 케이블' }).click();
+  await desktop.getByRole('heading', { name: 'Android를 USB 케이블로 연결하세요' }).waitFor();
+  assert.equal(await desktop.getByRole('button', { name: '다음' }).isDisabled(), true);
+  await desktop.getByRole('button', { name: '같은 Wi-Fi' }).click();
   await desktop.getByRole('button', { name: '연결 코드 만들기' }).click();
   const pairLink = desktop.getByRole('link', { name: '연결 주소' });
   await pairLink.waitFor();
@@ -54,6 +58,11 @@ test('휴대폰 브라우저의 지문으로 Drive에서 정확히 두 행을 �
   await phone.getByRole('button', { name: '지문 보내기' }).click();
   await phone.getByText(/전송 완료 · 고유 파일 3개/).waitFor();
   await desktop.locator('#device option').filter({ hasText: '테스트 휴대폰' }).waitFor({ state: 'attached' });
+  await desktop.getByRole('button', { name: '다음' }).click();
+  await desktop.getByRole('heading', { name: '비교할 폴더 열기' }).waitFor();
+  assert.equal(await desktop.locator('[aria-current="step"]').innerText(), '2\n폴더 열기');
+  assert.equal(await desktop.getByRole('button', { name: '다음' }).isDisabled(), true);
+  assert.match(await desktop.getByRole('list', { name: '진행 단계' }).innerText(), /3\s+비교 & 정리/);
 
   const submitted = (await send).postDataJSON();
   assert.deepEqual(submitted.entries, phoneFiles.map(({ buffer }) => ({

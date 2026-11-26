@@ -1,0 +1,90 @@
+:root {
+  color-scheme: light dark;
+  --paper: light-dark(#f9fafb, #1e232d);
+  --chrome: light-dark(#edf0f4, #181d26);
+  --line: light-dark(#cdd3dc, #414958);
+  --control: light-dark(#8997aa, #687589);
+  --text: light-dark(#1c2636, #edf1f8);
+  --muted: light-dark(#525e70, #b3bfce);
+  --blue: light-dark(#284d87, #a8c3fc);
+  --blue-bg: light-dark(#e8effa, #2c3b56);
+  --on-blue: light-dark(#fff, #182744);
+  --danger: light-dark(#a12f24, #ffb0a9);
+  --on-danger: light-dark(#fff, #402022);
+  background: var(--paper);
+  color: var(--text);
+  font: 14px/1.5 "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+[hidden] { display: none !important; }
+.titlebar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 54px;
+  padding: 0 18px;
+  border-bottom: 1px solid var(--line);
+  background: var(--chrome);
+}
+h1 { margin: 0; font-size: 1rem; font-weight: 650; }
+main { width: min(100%, 700px); margin: auto; padding: 26px clamp(14px, 5vw, 40px); }
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 0; margin: 0 0 28px; list-style: none; border-bottom: 1px solid var(--line); }
+.steps li { display: flex; align-items: center; gap: 8px; min-height: 41px; border-bottom: 2px solid transparent; color: var(--muted); }
+.steps [aria-current="step"] { border-color: var(--blue); color: var(--blue); font-weight: 650; }
+.step-number { display: inline-grid; place-items: center; flex: 0 0 20px; height: 20px; border: 1px solid var(--line); font-size: .8rem; }
+.steps [aria-current="step"] .step-number { border-color: var(--blue); background: var(--blue); color: var(--on-blue); }
+h2 { margin: 0 0 14px; font-size: 1.6rem; line-height: 1.3; }
+h3 { margin: 0 0 4px; font-size: 1rem; }
+p { margin: 0 0 14px; color: var(--muted); }
+a { color: var(--blue); }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+button, input, select { font: inherit; }
+button {
+  padding: 6px 14px;
+  min-height: 42px;
+  border: 1px solid var(--blue);
+  border-radius: 3px;
+  background: var(--blue);
+  color: var(--on-blue);
+  font-weight: 650;
+  cursor: pointer;
+}
+button:not(:disabled):hover { filter: brightness(.92); }
+button:disabled { opacity: .6; cursor: default; }
+.quiet { border-color: var(--control); background: var(--paper); color: var(--text); }
+.danger { border-color: var(--danger); background: var(--danger); color: var(--on-danger); }
+.methods { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); }
+.methods button { min-height: 44px; border: 0; border-bottom: 2px solid transparent; border-radius: 0; color: var(--text); background: var(--paper); }
+.methods button[aria-pressed="true"] { background: var(--blue-bg); border-bottom-color: var(--blue); color: var(--blue); }
+.methods button:focus-visible { position: relative; }
+.connection-panel { display: flex; align-items: center; gap: clamp(14px, 4vw, 26px); min-height: 166px; padding: 14px 0; }
+.connection-panel p { margin: 0; }
+.connection-panel img { flex: 0 0 auto; padding: 6px; border: 1px solid var(--line); background: var(--chrome); }
+.connection-tools, #network-choice { margin-top: 12px; }
+.setup { padding-inline-start: 22px; }
+.setup li + li { margin-top: 4px; }
+.actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 18px; padding-top: 13px; border-top: 1px solid var(--line); }
+#connect-step .actions { margin-top: 0; }
+#connection-status { color: var(--muted); overflow-wrap: anywhere; }
+.line { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 12px; }
+label { display: grid; gap: 4px; width: fit-content; max-width: 100%; font-size: .9rem; }
+input, select { padding: 6px 8px; min-height: 42px; border: 1px solid var(--control); border-radius: 3px; background: var(--paper); color: var(--text); max-width: 100%; }
+input[type="number"] { width: 98px; }
+#device { width: min(280px, 76vw); }
+details { margin-top: 8px; }
+summary { cursor: pointer; }
+.result { margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--line); }
+ul { padding-inline-start: 22px; overflow-wrap: anywhere; }
+#matches, #skipped-list { max-height: 220px; overflow: auto; }
+#status { margin-top: 12px; }
+#status:empty, #uncertain:empty { margin: 0; }
+#status[data-error] { color: var(--danger); }
+
+@media (max-width: 420px) {
+  .steps { gap: 6px; }
+  .steps li { gap: 4px; font-size: .85rem; }
+  .connection-panel img { width: 84px; height: 84px; }
+}

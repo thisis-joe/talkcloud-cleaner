@@ -1,63 +1,51 @@
 # 톡클라우드 중복 정리
 
-폰이나 태블릿에 이미 저장한 파일과 내용이 같은 **톡클라우드 사본**을 찾습니다. 결과를 확인하면 클라우드 사본만 휴지통으로 옮깁니다. 폰 저장본은 읽기 전용으로 처리합니다.
+휴대폰에 이미 저장한 파일과 내용이 같은 톡클라우드 사본을 찾습니다. 일치 목록을 확인한 뒤 클라우드 사본을 휴지통으로 옮길 수 있습니다.
 
-## 다운로드 및 설치
+## 설치
 
-아래 링크에서 PC에 맞는 설치 파일을 받으세요. 실행 환경과 톡클라우드용 브라우저가 포함되어 있어 **터미널, Node.js, 별도 브라우저 설치 없이** 사용할 수 있습니다.
-
-| PC | 설치 파일 | 여는 방법 |
+| 내 컴퓨터 | 다운로드 | 설치 방법 |
 | --- | --- | --- |
-| Windows x64 | [Windows 설치 파일 (.exe)](https://github.com/thisis-joe/talkcloud-cleaner/releases/download/v0.2.1/TalkCloudCleaner-0.2.1-windows-x64.exe) | 다운로드한 `.exe`를 두 번 클릭해 설치합니다. |
-| Mac Apple Silicon | [Apple Silicon용 (.dmg)](https://github.com/thisis-joe/talkcloud-cleaner/releases/download/v0.2.1/TalkCloudCleaner-0.2.1-mac-arm64.dmg) | `.dmg`를 열고 앱을 **응용 프로그램** 폴더로 옮깁니다. |
-| Mac Intel | [Intel용 (.dmg)](https://github.com/thisis-joe/talkcloud-cleaner/releases/download/v0.2.1/TalkCloudCleaner-0.2.1-mac-x64.dmg) | `.dmg`를 열고 앱을 **응용 프로그램** 폴더로 옮깁니다. |
+| Windows x64 | [Windows 설치 파일 (.exe)](https://github.com/thisis-joe/talkcloud-cleaner/releases/download/v0.2.1/TalkCloudCleaner-0.2.1-windows-x64.exe) | 받은 파일을 두 번 클릭합니다. |
+| Mac Apple Silicon | [Apple Silicon용 (.dmg)](https://github.com/thisis-joe/talkcloud-cleaner/releases/download/v0.2.1/TalkCloudCleaner-0.2.1-mac-arm64.dmg) | DMG를 열어 앱을 응용 프로그램 폴더로 옮깁니다. |
+| Mac Intel | [Intel용 (.dmg)](https://github.com/thisis-joe/talkcloud-cleaner/releases/download/v0.2.1/TalkCloudCleaner-0.2.1-mac-x64.dmg) | DMG를 열어 앱을 응용 프로그램 폴더로 옮깁니다. |
 
-Mac 종류는 ** → 이 Mac에 관하여**에서 확인할 수 있습니다. **칩**에 Apple이 표시되면 Apple Silicon용을, **프로세서**에 Intel이 표시되면 Intel용을 받으세요. [Apple의 Mac 종류 확인 안내](https://support.apple.com/en-us/116943)
+Mac 종류는 ** → 이 Mac에 관하여**에서 확인합니다. **칩**에 Apple이 표시되면 Apple Silicon용, **프로세서**에 Intel이 표시되면 Intel용을 받으세요. 앱은 터미널 없이 실행할 수 있습니다.
 
-[최신 릴리스 보기](https://github.com/thisis-joe/talkcloud-cleaner/releases/latest) · [v0.2.1 체크섬 (SHA‑256)](https://github.com/thisis-joe/talkcloud-cleaner/releases/download/v0.2.1/SHA256SUMS.txt)
+> **첫 실행 때 보안 경고가 뜰 수 있습니다.** v0.2.1의 Windows 설치 파일은 서명되지 않았고 macOS 앱은 Apple 공증을 받지 않았습니다. 경고가 뜨면 파일을 이 저장소의 Releases에서 받았는지 확인하세요.
 
-### 첫 실행에 보안 경고가 나오나요?
+[릴리스 및 보안 안내](https://github.com/thisis-joe/talkcloud-cleaner/releases/latest) · [v0.2.1 체크섬](https://github.com/thisis-joe/talkcloud-cleaner/releases/download/v0.2.1/SHA256SUMS.txt)
 
-**v0.2.1의 Windows 설치 파일은 게시자 서명이 없고, macOS 빌드는 Apple 공증을 받지 않았습니다.**
+## 사용 방법
 
-- **Windows**에서는 SmartScreen이 앱을 인식하지 못했다는 경고를 표시할 수 있습니다. 조직에서 관리하는 PC에서는 정책에 따라 실행이 차단될 수 있습니다. [Microsoft SmartScreen 안내](https://learn.microsoft.com/windows/apps/package-and-deploy/smartscreen-reputation)
-- **macOS**에서는 Gatekeeper가 개발자를 확인할 수 없거나 Apple이 앱을 검사하지 못했다는 메시지를 표시하고 실행을 차단할 수 있습니다. 공증된 앱에도 인터넷에서 받은 앱을 처음 열 때 일반 확인창이 나올 수 있습니다. [Apple의 앱 열기 안내](https://support.apple.com/en-us/102445)
+1. **휴대폰 연결.** 휴대폰과 컴퓨터를 같은 Wi-Fi에 연결합니다. 앱에서 **연결 코드 만들기**를 누른 뒤 휴대폰으로 QR을 스캔합니다. 파일을 고르고 **지문 보내기**를 누릅니다.
+2. **폴더 열기.** PC 앱에서 **톡클라우드 열기**를 눌러 로그인한 뒤, 비교할 폴더나 파일 목록을 엽니다.
+3. **비교 & 정리.** PC 앱으로 돌아와 저장 기기를 고르고 **비교 시작**을 누릅니다. 일치 목록을 확인하고 **클라우드 사본을 휴지통으로**를 누릅니다.
 
-경고가 뜨면 다운로드 주소가 이 저장소의 Releases인지 확인하세요. 설치 파일을 받은 경로가 불분명하거나 기기의 보안 정책이 실행을 차단하면 설치를 중단하세요.
+Android와 iPhone·iPad에서 같은 Wi-Fi 연결을 사용할 수 있습니다. iPhone·iPad는 파일 선택 화면에서 **나의 iPhone** 또는 **나의 iPad**에 저장한 파일을 고르세요.
 
-## 폰에 있는 파일만 찾아 정리하기
+<details>
+<summary>Android를 USB로 연결하기</summary>
 
-USB 케이블과 휴대폰 앱 설치 없이 사용할 수 있습니다. 폰과 PC를 같은 Wi-Fi에 연결하고 톡클라우드에 로그인할 카카오 계정을 준비하세요.
+1. [Android Platform-Tools](https://developer.android.com/tools/releases/platform-tools)를 받아 사용자 홈 폴더 바로 아래에 `platform-tools` 폴더로 압축을 풉니다.
+2. 휴대폰 설정에서 빌드 번호를 7번 누른 뒤 **개발자 옵션 → USB 디버깅**을 켭니다.
+3. 데이터 전송용 USB 케이블을 연결하고 휴대폰에서 USB 디버깅을 허용합니다. PC 앱에서 **USB 케이블 → USB로 연결**을 누릅니다.
 
-1. **같은 Wi-Fi에 연결합니다.** PC와 폰을 같은 신뢰할 수 있는 Wi-Fi에 연결합니다. PC 앱에서 **연결 코드 만들기**를 누르고 폰 카메라로 QR 코드를 스캔합니다. 네트워크 주소가 여러 개라면 PC의 Wi-Fi 주소를 고릅니다.
-2. **폰에서 비교할 파일을 고릅니다.** QR로 열린 브라우저에서 기기 이름을 확인하고 **폴더 추가** 또는 **파일 추가**를 선택합니다. 폴더 선택을 지원하지 않는 브라우저에서는 여러 파일을 한꺼번에 고를 수 있습니다. **지문 보내기**를 누릅니다. 태블릿의 파일도 비교하려면 별도의 연결 코드를 발급해 그 기기에서 반복합니다.
-3. **PC에서 비교할 톡클라우드 목록을 엽니다.** **톡클라우드 열기**를 누르고 앱 전용 브라우저에 로그인합니다. 드라이브 폴더, 채팅 파일 또는 사진·동영상 목록을 열고 비교가 끝날 때까지 창을 그대로 둡니다.
-4. **기기를 골라 비교합니다.** PC 앱에서 저장 기기를 고르고 **비교 시작**을 누릅니다. 현재 열어 둔 목록에서 기본 100개까지 확인하며 비교 개수는 1~1,000개로 지정할 수 있습니다. 처음에는 작은 드라이브 폴더에서 몇 개로 확인하기 좋습니다.
-5. **일치 목록을 확인하고 이동합니다.** **클라우드 사본을 휴지통으로**를 누르고 확인하면 선택한 기기와 내용이 일치하는 사본만 이동합니다. 비교 후 클라우드 파일 내용이 달라졌거나 다시 읽을 수 없는 항목은 제외됩니다. 톡클라우드에서 이동한 항목의 공유 및 중요 표시가 해제될 수 있습니다.
+</details>
 
-### 연결이나 비교가 잘 안 될 때
+## 앱 화면
 
-- **QR 주소가 열리지 않아요.** 두 기기가 같은 Wi-Fi를 사용하는지 확인하고 PC 앱에서 Wi-Fi 주소를 다시 골라 연결 코드를 만드세요.
-- **iPhone·iPad에서는 어디서 파일을 고르나요?** Safari의 파일 선택에서 **나의 iPhone** 또는 **나의 iPad**에 저장된 파일을 고르세요. 사진 보관함이 내보낼 때 파일을 변환하면 클라우드 사본과 내용이 달라져 목록에 잡히지 않을 수 있습니다.
-- **같은 파일이 결과에 안 나와요.** 앱은 파일 내용을 SHA‑256 지문으로 비교합니다. 파일명이 같아도 저장 과정에서 내용이 변한 경우는 일치하지 않습니다. 폰 저장본이 바뀌었다면 지문을 다시 보내고 비교를 시작하세요.
-- **휴지통 이동 중 오류가 났어요.** 앱의 이동 결과와 톡클라우드 휴지통을 확인한 뒤 새로 비교하세요. 톡클라우드 웹 화면이 바뀌면 비교 또는 이동이 중단될 수 있습니다.
+아래 화면과 Android USB는 현재 소스 기준입니다. 위 v0.2.1 설치 파일에서는 같은 Wi-Fi로 연결할 수 있습니다.
 
-## 파일과 연결은 어떻게 처리하나요?
+![휴대폰 연결 화면. 같은 Wi-Fi 탭에서 QR 연결 코드를 만들거나 USB 케이블 탭을 선택할 수 있습니다.](docs/images/connect.png)
 
-폰 브라우저는 기기 이름과 각 파일의 **비교용 지문 및 크기**를 PC에 보냅니다. 휴대폰 파일 원본과 파일명은 이 연결로 보내지 않습니다. PC는 비교할 톡클라우드 파일을 내려받아 지문을 계산하고, 휴지통으로 옮기기 직전에 내용을 다시 확인합니다.
+![비교 및 정리 화면. 예제 파일 3개 중 일치한 2개와 휴지통 이동 버튼이 보입니다.](docs/images/compare.png)
 
-폰과 PC는 앱 사용 중 같은 로컬 네트워크에서 HTTP로 통신합니다. 톡클라우드 로그인은 앱 전용 브라우저 프로필에 유지됩니다. 채팅 백업은 앱에서 한 번 확인한 후 항목별로 이동하고, 드라이브에서는 같은 화면의 일치 항목을 묶어 이동합니다.
+<details>
+<summary>파일 처리와 개발</summary>
 
-## 검증 범위
+휴대폰은 비교에 필요한 파일 지문과 크기를 PC로 보냅니다. 앱은 파일 내용이 같은 클라우드 사본만 이동 대상으로 표시합니다. 이동한 항목의 공유나 중요 표시가 해제될 수 있습니다.
 
-- **실제 톡클라우드 드라이브**에서 테스트 파일 3개를 내려받아 비교했습니다. 로컬 테스트 폴더에 일치하는 2개만 한 번에 휴지통에 옮겼고, 나머지 1개는 드라이브에 남는 것을 확인했습니다.
-- **Windows 브라우저 자동 테스트**로 폰 화면의 지문 전송, 비교, 테스트용 드라이브의 휴지통 이동을 확인했습니다.
-- **Windows x64·Mac Apple Silicon·Mac Intel**에서 설치본에 들어 있는 앱과 브라우저의 시작을 GitHub Actions로 확인했습니다. Android·iOS 실기기와 실제 채팅 백업 파일의 휴지통 이동은 별도 실사용 검증이 필요합니다. [v0.2.1 빌드 및 검증 결과](https://github.com/thisis-joe/talkcloud-cleaner/actions/runs/45765025882)
+Node.js 22.12 이상과 Chrome을 준비한 뒤 `npm ci`, `npm run desktop`을 실행합니다. 테스트는 `npm test`로 실행합니다.
 
-## 소스에서 실행
-
-Node.js 22.12 이상과 Chrome이 설치된 환경에서 `npm ci` 후 `npm run desktop`을 실행합니다. `npm test`는 로컬 비교, 페어링과 브라우저 자동화를 확인합니다.
-
-**Build desktop release** 워크플로를 실행하거나 버전 태그를 푸시하면 GitHub Actions가 각 운영체제의 설치 파일을 만들고 앱이 시작되는지 확인한 뒤 Releases에 게시합니다.
-
-게시 전에 Windows 설치 파일의 Authenticode 서명과 macOS 앱의 Developer ID 서명 및 Apple 공증 티켓을 확인합니다. 확인되지 않은 설치 파일의 첫 실행 경고가 릴리스 설명 맨 위에 표시됩니다. 수동 실행 시 **Preview the release notice without publishing**을 선택하면 게시 없이 준비된 안내를 실행 요약에서 확인할 수 있습니다.
+</details>
