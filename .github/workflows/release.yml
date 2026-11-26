@@ -1,0 +1,99 @@
+name: Build desktop release
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build (${{ matrix.platform }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: windows-x64
+            runner: windows-2025
+            target: --win --x64
+          - platform: mac-arm64
+            runner: macos-15
+            target: --mac --arm64
+          - platform: mac-x64
+            runner: macos-15-intel
+            target: --mac --x64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Check release version
+        if: github.ref_type == 'tag'
+        shell: bash
+        run: test "v$(node -p "require('./package.json').version")" = "$GITHUB_REF_NAME"
+      - name: Run application tests
+        if: matrix.platform == 'windows-x64'
+        run: npm test
+      - name: Download bundled Chromium
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/.bundle-browser
+        run: npx --no-install playwright install chromium --no-shell
+      - name: Build installer
+        run: npx --no-install electron-builder ${{ matrix.target }} --publish never
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Launch packaged Windows app
+        if: matrix.platform == 'windows-x64'
+        shell: pwsh
+        run: |
+          $app = Start-Process -FilePath (Resolve-Path 'dist/win-unpacked/TalkCloudCleaner.exe') -ArgumentList '--smoke-test' -PassThru -WindowStyle Hidden
+          if (-not $app.WaitForExit(90000)) { $app.Kill(); throw 'Packaged app timed out' }
+          if ($app.ExitCode -ne 0) { throw "Packaged app failed with exit code $($app.ExitCode)" }
+      - name: Launch packaged Mac app
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          executable=$(find dist -path '*/TalkCloudCleaner.app/Contents/MacOS/TalkCloudCleaner' -type f -print -quit)
+          test -n "$executable"
+          "$executable" --smoke-test
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform }}
+          path: |
+            dist/*.exe
+            dist/*.dmg
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: installers
+          merge-multiple: true
+      - name: Publish installers
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          release_tag="v$(node -p "require('./package.json').version")"
+          cd installers
+          windows="TalkCloudCleaner-${release_tag#v}-windows-x64.exe"
+          mac_intel="TalkCloudCleaner-${release_tag#v}-mac-x64.dmg"
+          mac_apple="TalkCloudCleaner-${release_tag#v}-mac-arm64.dmg"
+          sha256sum "$windows" "$mac_intel" "$mac_apple" > SHA256SUMS.txt
+          if gh release view "$release_tag" >/dev/null 2>&1; then
+            gh release upload "$release_tag" --clobber "$windows" "$mac_intel" "$mac_apple" SHA256SUMS.txt
+          else
+            gh release create "$release_tag" --target "$GITHUB_SHA" --title "$release_tag" --notes "Windows x64 · macOS Apple Silicon · macOS Intel. These installers are not publisher-signed or Apple-notarized." "$windows" "$mac_intel" "$mac_apple" SHA256SUMS.txt
+          fi

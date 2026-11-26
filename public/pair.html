@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>이 기기의 파일 확인</title>
+<link rel="stylesheet" href="/style.css">
+<main>
+  <header><h1>이 기기의 파일 확인</h1><p>이 기기에 저장된 폴더나 파일을 고르세요. 비교용 지문만 PC에 보냅니다.</p></header>
+  <section>
+    <label>기기 이름 <input id="device-name" type="text" maxlength="48" required></label>
+    <p>파일 앱에서 기기 저장공간을 선택하세요. iPhone에서 원본 바이트를 비교하려면 ‘나의 iPhone’의 파일을 선택하세요.</p>
+    <div class="line">
+      <label class="picker" id="folder-choice">폴더 추가 <input type="file" id="folder" webkitdirectory multiple></label>
+      <label class="picker">파일 추가 <input type="file" id="files" multiple></label>
+    </div>
+    <p id="picked">선택된 파일 없음</p>
+    <div class="line"><button id="send" disabled>지문 보내기</button><button id="reset" class="quiet" disabled>선택 비우기</button></div>
+    <p id="phone-status" role="status" aria-live="polite"></p>
+  </section>
+</main>
+<script type="module" src="/phone.mjs"></script>
+</html>

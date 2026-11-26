@@ -1,0 +1,31 @@
+appId: com.thisisjoe.talkcloudcleaner
+productName: TalkCloudCleaner
+directories:
+  output: dist
+files:
+  - electron.mjs
+  - app.mjs
+  - match.mjs
+  - talkcloud.mjs
+  - public/**
+  - package.json
+extraResources:
+  - from: .bundle-browser
+    to: cloud-browser
+    filter:
+      - "**/*"
+      - "!.links/**"
+win:
+  target: nsis
+  artifactName: TalkCloudCleaner-${version}-windows-${arch}.${ext}
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+mac:
+  target: dmg
+  category: public.app-category.utilities
+  artifactName: TalkCloudCleaner-${version}-mac-${arch}.${ext}
+  identity: "-"
+  notarize: false
+  extendInfo:
+    NSLocalNetworkUsageDescription: 휴대폰의 파일 지문을 같은 Wi-Fi에서 받기 위해 로컬 네트워크를 사용합니다.
