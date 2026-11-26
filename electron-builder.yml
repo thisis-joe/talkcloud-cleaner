@@ -4,6 +4,8 @@ directories:
   output: dist
 files:
   - electron.mjs
+  - desktop-updates.mjs
+  - updates.mjs
   - app.mjs
   - match.mjs
   - talkcloud.mjs
