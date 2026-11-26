@@ -1,5 +1,10 @@
 # 변경 내역
 
+## 0.2.1
+
+- 릴리스에서 Windows 설치 파일의 서명과 Mac 앱의 Developer ID 서명 및 공증 티켓을 확인합니다.
+- 확인되지 않은 플랫폼의 첫 실행 보안 경고를 다운로드 목록 위에 자동으로 표시합니다.
+
 ## 0.2.0
 
 - Windows 설치 EXE와 macOS Intel·Apple Silicon DMG를 제공합니다.
